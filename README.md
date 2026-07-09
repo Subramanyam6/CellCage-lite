@@ -8,6 +8,23 @@ A real-time simulation of the image-guided cell-caging pipeline: detect cells in
 
 ---
 
+## Contents
+
+- [Overview](#overview)
+- [The problem](#the-problem)
+- [Pipeline](#pipeline)
+  - [1. Detect](#1-detect)
+  - [2. Classify](#2-classify)
+  - [3. Place cages](#3-place-cages)
+  - [4. Track](#4-track)
+- [Data and training](#data-and-training)
+- [Validation](#validation)
+- [Demo](#demo)
+- [Tech stack and how to run](#tech-stack-and-how-to-run)
+- [Roadmap](#roadmap)
+
+---
+
 ## Overview
 
 An image-guided single-cell instrument scans cells on a plate, selects the cells of interest, and forms a physical cage around each one so it can be studied in isolation. The software behind it has to decide, from each image and in real time, where those cages go.
