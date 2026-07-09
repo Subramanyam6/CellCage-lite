@@ -1,6 +1,6 @@
 # CellCage-Sim
 
-A real-time simulation of the image-guided cell-caging pipeline: detect cells in a microscope image, identify the targets, place isolation cages around them under geometric constraints, and track them across frames.
+A personal project exploring the vision and optimization pipeline behind Cellanome's CellCage single-cell caging: detect cells in a microscope image, identify the targets, place isolation cages around them under geometric constraints, and track them across frames.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-ee4c2c)
