@@ -311,17 +311,21 @@ _The metrics below are what the project reports; each value is filled in as its 
 |---|---|---|
 | Detection | IoU / Dice | _TBD_ |
 | Classification | Accuracy / F1 @ k-shot | _TBD_ |
-| Cage placement | Target coverage %, constraint-violation rate | _TBD_ |
-| Cage placement vs. baseline | Coverage uplift over a naive greedy baseline | _TBD_ |
-| Tracking | ID switches, MOTA | _TBD_ |
+| Cage placement | Target coverage %, constraint-violation rate | 0% violations across every field; coverage 72% at 100 cells, 47% at 250, 22% at 500 (the denser the field, the fewer targets can be caged without a rule break) |
+| Cage placement vs. baseline | Coverage uplift over a naive greedy baseline | up to +3.6 points of coverage over first-come greedy |
+| Tracking | ID switches, identity accuracy | 0 switches, 1.00 identity accuracy on synthetic drift, clean and with a 15% detection-miss rate |
 
 **Performance**
 
-| Configuration | Latency / field | Throughput | Peak memory |
-|---|---|---|---|
-| Cage engine, circular | _TBD_ | _TBD_ | _TBD_ |
-| Cage engine, hexagonal | _TBD_ | _TBD_ | _TBD_ |
-| Full pipeline (detect to cage) | _TBD_ | _TBD_ | _TBD_ |
+| Configuration | Cells / field | Latency / field | Throughput | Peak memory |
+|---|---|---|---|---|
+| Cage engine, circular | 100 | 5.4 ms | 186 fields/s | 0.06 MB |
+| Cage engine, circular | 250 | 19.7 ms | 51 fields/s | 0.07 MB |
+| Cage engine, circular | 500 | 41.5 ms | 24 fields/s | 0.09 MB |
+| Cage engine, hexagonal | | _TBD_ | | |
+| Full pipeline (detect to cage) | | _TBD_ | | |
+
+Cage and tracking numbers are measured on an Apple M4 Pro and reproduce with `python -m bench.run`. Detection and classification are filled in once their training runs land.
 
 ---
 
