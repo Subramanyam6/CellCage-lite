@@ -1,18 +1,18 @@
 """Independent checker for a set of cage placements.
 
 The placement engine is built to satisfy the three validity rules by
-construction. This module verifies them after the fact, from scratch, against
-the raw geometry. It is what the tests assert on and what the benchmark uses to
-report a constraint-violation rate; keeping it independent of the engine means a
-bug in the engine cannot hide itself.
+construction. This module verifies them after the fact against the raw geometry,
+for either cage shape. It is what the tests assert on and what the benchmark uses
+to report a constraint-violation rate; keeping it separate from the engine's
+placement path means a bug there cannot hide itself here.
 """
 
 from __future__ import annotations
 
-import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
+from .shapes import cages_overlap, interior_shape, outer_shape
 from .types import Cage, CageSpec, Cell
 
 # Tolerance for floating-point comparisons and the Chebyshev-center precision.
@@ -57,52 +57,51 @@ def validate_placement(
     by_id = {c.id: c for c in cells}
     non_targets = [c for c in cells if c.label != "target"]
 
-    # Rule 1: enclosure.
+    # Rule 1: enclosure. Each target cell (a disk of radius rho) must sit inside
+    # the cage interior, i.e. the interior boundary is at least rho away.
     for cage in cages:
+        interior = interior_shape(spec, cage.x, cage.y)
         for cid in cage.target_ids:
             cell = by_id.get(cid)
             if cell is None:
                 continue
-            limit = spec.enclosure_radius(cell.radius)
-            d = math.hypot(cage.x - cell.x, cage.y - cell.y)
-            if d > limit + tol:
+            margin = interior.signed_distance(cell.x, cell.y)
+            if margin < cell.radius - tol:
                 report.violations.append(
                     Violation(
                         "enclosure",
                         f"cage {cage.center} does not enclose target cell {cid} "
-                        f"(distance {d:.2f} > limit {limit:.2f})",
+                        f"(interior margin {margin:.2f} < cell radius {cell.radius:.2f})",
                     )
                 )
 
     # Rule 2: exclusion. A non-target that is a member of a cage's own target is
-    # allowed inside that cage (co-caging); every other cage must keep it clear.
+    # allowed inside that cage (co-caging); every other cage must keep it fully
+    # outside the outer wall.
     for cage in cages:
+        outer = outer_shape(spec, cage.x, cage.y)
         for nt in non_targets:
             if nt.id in cage.target_ids:
                 continue
-            keep_out = spec.radius + nt.radius
-            d = math.hypot(cage.x - nt.x, cage.y - nt.y)
-            if d < keep_out - tol:
+            outside_margin = -outer.signed_distance(nt.x, nt.y)
+            if outside_margin < nt.radius - tol:
                 report.violations.append(
                     Violation(
                         "exclusion",
                         f"cage {cage.center} traps non-target cell {nt.id} "
-                        f"(distance {d:.2f} < keep-out {keep_out:.2f})",
+                        f"(clearance {outside_margin:.2f} < cell radius {nt.radius:.2f})",
                     )
                 )
 
-    # Rule 3: collision.
-    min_sep = spec.collision_distance()
+    # Rule 3: collision. No two cages may overlap (touching is allowed, so the
+    # boundaries are pulled in by `tol` before the test).
     for i in range(len(cages)):
         for j in range(i + 1, len(cages)):
-            a, b = cages[i], cages[j]
-            d = math.hypot(a.x - b.x, a.y - b.y)
-            if d < min_sep - tol:
+            if cages_overlap(spec, cages[i], cages[j], shrink=tol):
                 report.violations.append(
                     Violation(
                         "collision",
-                        f"cages {a.center} and {b.center} overlap "
-                        f"(distance {d:.2f} < min separation {min_sep:.2f})",
+                        f"cages {cages[i].center} and {cages[j].center} overlap",
                     )
                 )
 

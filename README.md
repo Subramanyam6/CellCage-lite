@@ -322,10 +322,12 @@ _The metrics below are what the project reports; each value is filled in as its 
 | Cage engine, circular | 100 | 5.4 ms | 186 fields/s | 0.06 MB |
 | Cage engine, circular | 250 | 19.7 ms | 51 fields/s | 0.07 MB |
 | Cage engine, circular | 500 | 41.5 ms | 24 fields/s | 0.09 MB |
-| Cage engine, hexagonal | | _TBD_ | | |
+| Cage engine, hexagonal | 100 | 33 ms | 30 fields/s | 0.13 MB |
+| Cage engine, hexagonal | 250 | 173 ms | 6 fields/s | 0.19 MB |
+| Cage engine, hexagonal | 500 | 604 ms | 2 fields/s | 0.24 MB |
 | Full pipeline (detect to cage) | | _TBD_ | | |
 
-Cage and tracking numbers are measured on an Apple M4 Pro and reproduce with `python -m bench.run`. Detection and classification are filled in once their training runs land.
+Cage and tracking numbers are measured on an Apple M4 Pro and reproduce with `python -m bench.run`. The hexagonal path is the pure-Python reference (point-in-polygon and separating-axis tests in the inner loop); moving it to the compiled core on the roadmap closes the gap to the circular numbers. Detection and classification are filled in once their training runs land.
 
 ---
 

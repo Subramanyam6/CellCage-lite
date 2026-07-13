@@ -15,8 +15,15 @@ from collections.abc import Sequence
 import numpy as np
 from scipy.spatial import cKDTree
 
-from .geometry import Disk, FeasibleRegion, chebyshev_center
+from .geometry import Convex, FeasibleRegion, chebyshev_center
 from .mis import SMALL_CLUSTER, connected_components, exact_mis, greedy_then_local_search
+from .shapes import (
+    cages_overlap,
+    enclosure_reach,
+    enclosure_shape,
+    exclusion_reach,
+    exclusion_shape,
+)
 from .types import Cage, CageSpec, Cell, Target, build_targets
 
 
@@ -43,26 +50,28 @@ def _best_cage_for_target(
     radius is guaranteed to capture every non-target that could constrain this
     target.
     """
-    # Enclosure: the cage center must lie within R_enc of every cell in the
-    # target. A non-positive R_enc means the cell is larger than the cage can
-    # hold, so the target is infeasible outright.
-    enclosure: list[Disk] = []
+    # Enclosure: the cage center must lie inside the enclosure region of every
+    # cell in the target. A missing region means the cell is larger than the cage
+    # can hold, so the target is infeasible outright.
+    enclosure: list[Convex] = []
     for cell in target.cells:
-        r_enc = spec.enclosure_radius(cell.radius)
-        if r_enc <= 0.0:
+        shape = enclosure_shape(spec, cell)
+        if shape is None:
             return None
-        enclosure.append(Disk(cell.x, cell.y, r_enc))
+        enclosure.append(shape)
 
-    # Exclusion: subtract a disk around each nearby non-target the cage must not
-    # trap. Only non-targets whose exclusion disk can reach the enclosure matter,
+    # Exclusion: subtract a region around each nearby non-target the cage must not
+    # trap. Only non-targets whose exclusion region can reach an enclosure matter,
     # so we query the spatial index within a bounding radius rather than scanning
     # the whole plate.
-    exclusion: list[Disk] = []
+    exclusion: list[Convex] = []
     if nt_tree is not None and len(non_targets) > 0:
         seen: set[int] = set()
-        for cell, enc in zip(target.cells, enclosure):
-            # Widest possible exclusion disk reachable from this enclosure disk.
-            query_r = enc.r + spec.exclusion_radius(max_nt_radius, min_nt_confidence)
+        for cell in target.cells:
+            # Widest reach of any exclusion region from this enclosure.
+            query_r = enclosure_reach(spec, cell.radius) + exclusion_reach(
+                spec, max_nt_radius, min_nt_confidence
+            )
             for idx in nt_tree.query_ball_point((cell.x, cell.y), query_r):
                 if idx in seen:
                     continue
@@ -70,8 +79,7 @@ def _best_cage_for_target(
                 if nt.id in target.ids:
                     continue
                 seen.add(idx)
-                s = spec.exclusion_radius(nt.radius, nt.confidence)
-                exclusion.append(Disk(nt.x, nt.y, s))
+                exclusion.append(exclusion_shape(spec, nt))
 
     region = FeasibleRegion(enclosure=tuple(enclosure), exclusion=tuple(exclusion))
     result = chebyshev_center(region, precision=precision)
@@ -92,18 +100,18 @@ def _best_cage_for_target(
 def _overlap_edges(cages: Sequence[Cage], spec: CageSpec) -> list[tuple[int, int]]:
     """Edges of the overlap graph: pairs of cages whose walls collide.
 
-    Two circular cages overlap when their centers are closer than ``2 * radius``.
-    A KD-tree finds the colliding pairs without comparing every pair.
+    Two cages centered farther apart than ``2 * radius`` can never overlap, so a
+    KD-tree first narrows the field to candidate pairs; each candidate is then
+    confirmed with the exact shape overlap test (a distance check for circles,
+    the separating-axis theorem for hexagons).
     """
     if len(cages) < 2:
         return []
     xy = np.array([(c.x, c.y) for c in cages], dtype=float)
     tree = cKDTree(xy)
-    dist = spec.collision_distance()
     edges: list[tuple[int, int]] = []
-    for a, b in tree.query_pairs(dist):
-        # query_pairs includes exactly-touching pairs (== dist); those are valid.
-        if np.hypot(xy[a, 0] - xy[b, 0], xy[a, 1] - xy[b, 1]) < dist - 1e-9:
+    for a, b in tree.query_pairs(spec.collision_distance()):
+        if cages_overlap(spec, cages[a], cages[b]):
             edges.append((a, b))
     return edges
 
@@ -201,9 +209,8 @@ def place_cages_greedy_baseline(
     """
     spec = spec or CageSpec()
     candidates = _candidate_cages(cells, spec, precision)
-    dist = spec.collision_distance()
     kept: list[Cage] = []
     for cage in candidates:
-        if all(np.hypot(cage.x - k.x, cage.y - k.y) >= dist - 1e-9 for k in kept):
+        if not any(cages_overlap(spec, cage, k) for k in kept):
             kept.append(cage)
     return kept

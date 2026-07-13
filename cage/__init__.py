@@ -7,7 +7,15 @@ maximum number of valid cages over the targets. See the project README, section
 
 from __future__ import annotations
 
-from .geometry import ChebyshevResult, Disk, FeasibleRegion, chebyshev_center
+from .geometry import (
+    ChebyshevResult,
+    ConvexPolygon,
+    Disk,
+    FeasibleRegion,
+    chebyshev_center,
+    convex_overlap,
+    regular_hexagon,
+)
 from .placement import place_cages, place_cages_greedy_baseline
 from .types import Cage, CageSpec, Cell, Target, build_targets
 from .validate import ValidationReport, Violation, validate_placement
@@ -24,6 +32,9 @@ __all__ = [
     "ValidationReport",
     "Violation",
     "Disk",
+    "ConvexPolygon",
+    "regular_hexagon",
+    "convex_overlap",
     "FeasibleRegion",
     "ChebyshevResult",
     "chebyshev_center",

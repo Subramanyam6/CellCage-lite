@@ -172,7 +172,7 @@ def main() -> None:
         default=[100, 250, 500],
         help="cells per field to sweep",
     )
-    parser.add_argument("--shapes", nargs="+", default=["circle"])
+    parser.add_argument("--shapes", nargs="+", default=["circle", "hexagon"])
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--json", type=str, default=None, help="path to dump raw results")
     args = parser.parse_args()
