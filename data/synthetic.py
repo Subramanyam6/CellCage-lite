@@ -137,6 +137,45 @@ def _sample_point(rng, width, height, margin, centers) -> tuple[float, float]:
     return (x, y)
 
 
+def rasterize_plate(
+    plate: Plate,
+    target_intensity: float = 0.85,
+    other_intensity: float = 0.45,
+    noise: float = 0.03,
+    seed: int = 0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Render a plate to a grayscale image and a matching instance-label mask.
+
+    Each cell is drawn as a filled disk. Targets are painted brighter than
+    non-targets, so a simple intensity feature can tell them apart (useful for a
+    torch-free end-to-end run). Mask label ``i + 1`` corresponds to
+    ``plate.cells[i]``. Returns ``(image, mask)``.
+    """
+    rng = np.random.default_rng(seed)
+    w, h = int(round(plate.width)), int(round(plate.height))
+    image = np.zeros((h, w), dtype=np.float32)
+    mask = np.zeros((h, w), dtype=np.int32)
+
+    for i, cell in enumerate(plate.cells, start=1):
+        r = int(np.ceil(cell.radius))
+        cx, cy = int(round(cell.x)), int(round(cell.y))
+        x0, x1 = max(0, cx - r), min(w, cx + r + 1)
+        y0, y1 = max(0, cy - r), min(h, cy + r + 1)
+        if x0 >= x1 or y0 >= y1:
+            continue
+        ys, xs = np.ogrid[y0:y1, x0:x1]
+        disk = (xs - cell.x) ** 2 + (ys - cell.y) ** 2 <= cell.radius**2
+        intensity = target_intensity if cell.label == "target" else other_intensity
+        window_img = image[y0:y1, x0:x1]
+        window_mask = mask[y0:y1, x0:x1]
+        window_img[disk] = intensity
+        window_mask[disk] = i
+
+    if noise > 0:
+        image = np.clip(image + rng.normal(0.0, noise, image.shape), 0.0, 1.0).astype(np.float32)
+    return image, mask
+
+
 def generate_sequence(
     n_cells: int = 30,
     n_frames: int = 20,

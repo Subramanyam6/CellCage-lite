@@ -65,6 +65,23 @@ def _resize_nn(patch: np.ndarray, size: int) -> np.ndarray:
     return patch[np.ix_(ys, xs)] if patch.ndim == 2 else patch[np.ix_(ys, xs, np.arange(patch.shape[2]))]
 
 
+class StatsEmbedder:
+    """A lightweight, torch-free embedder: simple per-crop intensity statistics.
+
+    Turns each crop into ``[mean, std, min, max]``. It captures nothing like the
+    richness of DINOv2, but it needs no model or download, which makes it a
+    useful baseline and lets the whole pipeline run end to end without a
+    deep-learning stack. :class:`DINOv2Embedder` is the real feature extractor.
+    """
+
+    def embed(self, crops: np.ndarray) -> np.ndarray:
+        x = np.asarray(crops, dtype=float)
+        if len(x) == 0:
+            return np.empty((0, 4))
+        flat = x.reshape(len(x), -1)
+        return np.column_stack([flat.mean(1), flat.std(1), flat.min(1), flat.max(1)])
+
+
 class DINOv2Embedder:
     """Frozen DINOv2 feature extractor.
 

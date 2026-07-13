@@ -7,6 +7,6 @@ exist.
 
 from __future__ import annotations
 
-from .synthetic import Plate, Sequence, generate_plate, generate_sequence
+from .synthetic import Plate, Sequence, generate_plate, generate_sequence, rasterize_plate
 
-__all__ = ["Plate", "Sequence", "generate_plate", "generate_sequence"]
+__all__ = ["Plate", "Sequence", "generate_plate", "generate_sequence", "rasterize_plate"]

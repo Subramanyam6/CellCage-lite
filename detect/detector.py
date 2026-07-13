@@ -49,6 +49,22 @@ def labels_to_cells(labels: np.ndarray) -> list[Cell]:
     return cells
 
 
+class MaskDetector:
+    """Detection from a precomputed instance-label mask (torch-free).
+
+    Stands in for the trained model when a segmentation is already available: for
+    replaying stored masks, or for exercising the downstream pipeline without a
+    deep-learning stack. Its ``detect`` ignores the image pixels and reduces the
+    mask to cells.
+    """
+
+    def __init__(self, mask: np.ndarray) -> None:
+        self.mask = np.asarray(mask)
+
+    def detect(self, image: np.ndarray | None = None) -> list[Cell]:
+        return labels_to_cells(self.mask)
+
+
 class Detector:
     """Segmentation front-end producing a cell list from an image."""
 

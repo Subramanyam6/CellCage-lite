@@ -26,7 +26,7 @@ demo = ["gradio>=4.0"]
 dev = ["pytest>=8.0"]
 
 [tool.setuptools.packages.find]
-include = ["cage*", "track*", "data*", "detect*", "classify*", "bench*", "app*"]
+include = ["cage*", "track*", "data*", "detect*", "classify*", "bench*", "app*", "pipeline*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

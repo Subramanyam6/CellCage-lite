@@ -348,8 +348,27 @@ cellcage-lite/
 ├── classify/      # DINOv2 embeddings + few-shot head + LoRA fine-tune
 ├── cage/          # constrained-optimization engine (circle/hexagon)
 ├── track/         # Kalman filter + assignment
+├── pipeline/      # end-to-end orchestration (detect -> classify -> cage -> track)
 ├── bench/         # latency / throughput / memory harness
-└── app/           # interactive demo
+├── app/           # interactive demo
+└── tests/         # test suite
+```
+
+The stages compose behind one entry point:
+
+```python
+from cage import CageSpec
+from detect import Detector
+from classify import CellClassifier, DINOv2Embedder, LinearProbe
+from pipeline import Pipeline
+
+pipe = Pipeline(
+    cage_spec=CageSpec(shape="circle", radius=18),
+    detector=Detector(backend="cellpose"),
+    classifier=CellClassifier(embedder=DINOv2Embedder(), head=LinearProbe()),
+)
+result = pipe.run_image(image)          # detect -> classify -> place cages
+print(result.coverage, result.latency_ms)
 ```
 
 ```bash

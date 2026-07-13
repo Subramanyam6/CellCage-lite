@@ -8,12 +8,13 @@ optional LoRA fine-tune of DINOv2. See README section 2.
 from __future__ import annotations
 
 from .classifier import CellClassifier
-from .embed import DINOv2Embedder, crop_cells
+from .embed import DINOv2Embedder, StatsEmbedder, crop_cells
 from .head import LinearProbe, NearestClassMean
 
 __all__ = [
     "CellClassifier",
     "DINOv2Embedder",
+    "StatsEmbedder",
     "crop_cells",
     "LinearProbe",
     "NearestClassMean",

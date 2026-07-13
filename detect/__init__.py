@@ -7,11 +7,12 @@ section 1.
 
 from __future__ import annotations
 
-from .detector import Detector, labels_to_cells
+from .detector import Detector, MaskDetector, labels_to_cells
 from .model import FlowUNet, flows_to_labels, masks_to_flows
 
 __all__ = [
     "Detector",
+    "MaskDetector",
     "labels_to_cells",
     "FlowUNet",
     "masks_to_flows",
