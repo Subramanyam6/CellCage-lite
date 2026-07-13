@@ -35,3 +35,6 @@ data/synthetic/
 # --- Notebooks / scratch ---
 .ipynb_checkpoints/
 scratch/
+
+# --- Demo output (rendered figures) ---
+app/output/
