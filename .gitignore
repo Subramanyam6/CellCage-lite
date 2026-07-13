@@ -20,6 +20,7 @@ dist/
 
 # --- Virtual environments ---
 .venv/
+.venv-ml/
 venv/
 env/
 

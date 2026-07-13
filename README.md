@@ -309,8 +309,8 @@ _The metrics below are what the project reports; each value is filled in as its 
 
 | Component | Metric | Result |
 |---|---|---|
-| Detection | IoU / Dice | _TBD_ |
-| Classification | Accuracy / F1 @ k-shot | _TBD_ |
+| Detection | IoU / Dice, AP | matched IoU 0.78, Dice 0.87; AP@0.5 0.64, AP@[0.5:0.95] 0.35 (Cellpose-SAM, zero-shot, LIVECell human lines) |
+| Classification | Accuracy / F1 @ k-shot | two-type separation 0.98 (mean over all line pairs); 7-way fine-grained 0.48 acc / 0.23 macro F1; few-shot 7-way 0.24 / 0.38 at k=1 / 5 (frozen DINOv2-base + linear probe) |
 | Cage placement | Target coverage %, constraint-violation rate | 0% violations across every field; coverage 72% at 100 cells, 47% at 250, 22% at 500 (the denser the field, the fewer targets can be caged without a rule break) |
 | Cage placement vs. baseline | Coverage uplift over a naive greedy baseline | up to +3.6 points of coverage over first-come greedy |
 | Tracking | ID switches, identity accuracy | 0 switches, 1.00 identity accuracy on synthetic drift, clean and with a 15% detection-miss rate |
@@ -327,7 +327,9 @@ _The metrics below are what the project reports; each value is filled in as its 
 | Cage engine, hexagonal | 500 | 604 ms | 2 fields/s | 0.24 MB |
 | Full pipeline (detect to cage) | | _TBD_ | | |
 
-Cage and tracking numbers are measured on an Apple M4 Pro and reproduce with `python -m bench.run`. The hexagonal path is the pure-Python reference (point-in-polygon and separating-axis tests in the inner loop); moving it to the compiled core on the roadmap closes the gap to the circular numbers. Detection and classification are filled in once their training runs land.
+All numbers are measured on an Apple M4 Pro. Cage and tracking reproduce with `python -m bench.run`; detection and classification reproduce with `python -m bench.eval_detection` and `python -m bench.eval_classification` against the downloaded LIVECell data (human cell lines only, BV2 mouse line excluded). The hexagonal path is the pure-Python reference (point-in-polygon and separating-axis tests in the inner loop); moving it to the compiled core on the roadmap closes the gap to the circular numbers.
+
+A note on the classification result: frozen DINOv2 separates any two cell lines with 98% accuracy, which is what the pipeline actually needs (flag one target type against another). All-at-once 7-way fine-grained line identification is much harder, because several of the human lines are visually similar breast-cancer lines; that is the honest ceiling for a single linear probe over isolated single-cell crops.
 
 ---
 
