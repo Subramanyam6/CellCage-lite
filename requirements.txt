@@ -1,0 +1,18 @@
+# Core numerics for the cage engine, tracking, and data generation.
+# These are enough to run the cage engine, synthetic data, tracking, and benchmarks.
+numpy>=1.26
+scipy>=1.11
+
+# Visualization / demo.
+matplotlib>=3.8
+
+# Optional, only needed for the vision stages (detect / classify).
+# Kept out of the core install so the geometry and tracking stack runs light.
+# torch>=2.2
+# torchvision>=0.17
+# cellpose>=3.0
+# scikit-image>=0.22
+# gradio>=4.0
+
+# Development.
+pytest>=8.0

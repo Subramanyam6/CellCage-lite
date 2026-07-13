@@ -1,0 +1,37 @@
+# --- Sensitive files: interview prep, never publish ---
+Text_JD_Cellanome.txt
+email_to_emily.txt
+*_Machine Learning Engineer_*.txt
+images/
+
+# --- OS ---
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Data and model artifacts (downloaded / generated, not versioned) ---
+data/cache/
+data/livecell/
+data/synthetic/
+*.pt
+*.pth
+*.npz
+*.h5
+
+# --- Notebooks / scratch ---
+.ipynb_checkpoints/
+scratch/
