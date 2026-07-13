@@ -1,4 +1,4 @@
-# CellCage-Sim
+# CellCage-lite
 
 A personal project exploring the vision and optimization pipeline behind Cellanome's CellCage single-cell caging: detect cells in a microscope image, identify the targets, place isolation cages around them under geometric constraints, and track them across frames.
 
@@ -29,7 +29,7 @@ A personal project exploring the vision and optimization pipeline behind Cellano
 
 An image-guided single-cell instrument scans cells on a plate, selects the cells of interest, and forms a physical cage around each one so it can be studied in isolation. The software behind it has to decide, from each image and in real time, where those cages go.
 
-CellCage-Sim reproduces that decision pipeline end to end. It runs four stages: (1) **detect** the cells, (2) **classify** them to find the targets, (3) **place** the cages, and (4) **track** the cells over time. The cage-placement stage is the core of the project. It is a constrained-optimization and computational-geometry problem; detection, classification, and tracking exist to feed and support it.
+CellCage-lite reproduces that decision pipeline end to end. It runs four stages: (1) **detect** the cells, (2) **classify** them to find the targets, (3) **place** the cages, and (4) **track** the cells over time. The cage-placement stage is the core of the project. It is a constrained-optimization and computational-geometry problem; detection, classification, and tracking exist to feed and support it.
 
 ---
 
@@ -336,7 +336,7 @@ An interactive demo runs the full pipeline in the browser. Select or upload a fi
 **Stack:** Python, PyTorch, DINOv2, NumPy/SciPy, Numba (with an optional pybind11/C++ core), scikit-image, Gradio.
 
 ```
-cellcage-sim/
+cellcage-lite/
 ├── data/          # LIVECell loader + synthetic plate generator
 ├── detect/        # segmentation model + training
 ├── classify/      # DINOv2 embeddings + few-shot head + LoRA fine-tune
